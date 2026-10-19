@@ -714,6 +714,13 @@
       el.addEventListener('input', highlightStep);
     });
 
+    /* ── Backend URL ─────────────────────────────────────────────────────────
+       Replace the string below with your actual Render service URL.
+       Example: 'https://mental-health-predictor.onrender.com'
+       Leave NO trailing slash.
+    ──────────────────────────────────────────────────────────────────────── */
+    const BACKEND_URL = 'https://YOUR-RENDER-SERVICE-NAME.onrender.com';
+
     /* Submit */
     document.getElementById('predictForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -759,7 +766,7 @@
           Stress_Level:            form.Stress_Level.value,
         };
 
-        const res = await fetch('/predict', {
+        const res = await fetch(BACKEND_URL + '/predict', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

@@ -1,5 +1,6 @@
 import joblib
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -9,6 +10,15 @@ from typing import Literal
 model = joblib.load('mental_health_model.pkl')
 
 app = FastAPI()
+
+# Allow cross-origin requests from the Vercel-hosted frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # tighten to your Vercel URL after first deploy
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class studentData(BaseModel):
     Age: int = Field(..., ge = 10, le = 100)
