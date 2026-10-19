@@ -1,5 +1,7 @@
 import joblib
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 import pandas as pd
 from typing import Literal
@@ -29,8 +31,10 @@ class PredictionResponse(BaseModel):
 
 
 @app.get("/")
-def greet():
-    return {"Hii, My name is Ayan Hussain"}    
+def serve_frontend():
+    return FileResponse("index.html")
+
+app.mount("/static", StaticFiles(directory="."), name="static")
 
 top_country = ['United States', 'India', 'United Kingdom', 'Canada', 'Australia', 'Germany', 'France']
 

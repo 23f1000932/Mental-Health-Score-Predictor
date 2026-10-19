@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindScore — Mental Health Predictor</title>
+  <meta name="description" content="Predict your mental health score based on your daily habits, social media usage, and lifestyle." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f5f4f0;
+      --white:    #ffffff;
+      --ink:      #1a1a1a;
+      --ink-2:    #3d3d3d;
+      --muted:    #888;
+      --border:   #e0ddd8;
+      --teal:     #0d7c66;
+      --teal-lt:  #e6f4f1;
+      --teal-mid: #c2e6df;
+      --warn:     #b45309;
+      --warn-lt:  #fef3c7;
+      --red:      #b91c1c;
+      --red-lt:   #fee2e2;
+      --blue:     #1d4ed8;
+      --blue-lt:  #dbeafe;
+      --r:        8px;
+      --shadow:   0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: -.01em;
+    }
+    .logo em {
+      font-style: italic;
+      color: var(--ink);
+    }
+    .topbar-tag {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── Page layout ── */
+    .page {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 20px 80px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      margin-bottom: 40px;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(1.9rem, 4vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--teal);
+    }
+    .hero-sub {
+      color: var(--ink-2);
+      font-size: .95rem;
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    /* ── Progress steps ── */
+    .steps {
+      display: flex;
+      gap: 0;
+      margin-bottom: 32px;
+      border-radius: var(--r);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--white);
+    }
+    .step {
+      flex: 1;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+      cursor: default;
+      transition: background .2s;
+    }
+    .step:last-child { border-right: none; }
+    .step.active {
+      background: var(--teal-lt);
+      color: var(--teal);
+    }
+    .step.done {
+      background: #f0faf7;
+      color: var(--teal);
+    }
+    .step-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem;
+      font-weight: 700;
+      background: var(--border);
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .step.active .step-num {
+      background: var(--teal);
+      color: #fff;
+    }
+    .step.done .step-num {
+      background: var(--teal);
+      color: #fff;
+    }
+    @media(max-width:560px){ .step span:not(.step-num){ display:none; } }
+
+    /* ── Form card ── */
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* ── Section ── */
+    .section {
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section:last-of-type { border-bottom: none; }
+    @media(max-width:560px){ .section { padding: 22px 18px; } }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .section-icon {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      background: var(--teal-lt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .95rem;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+    }
+
+    /* ── Grid ── */
+    .grid { display: grid; gap: 18px; }
+    .g2 { grid-template-columns: repeat(2,1fr); }
+    .g3 { grid-template-columns: repeat(3,1fr); }
+    @media(max-width:540px){ .g2,.g3{ grid-template-columns:1fr; } }
+
+    /* ── Fields ── */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    label {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--ink-2);
+    }
+
+    input[type="number"], select {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 13px;
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color .18s, box-shadow .18s;
+      -webkit-appearance: none;
+    }
+    input[type="number"]:hover, select:hover { border-color: #bbb; }
+    input[type="number"]:focus, select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(13,124,102,.12);
+      background: #fff;
+    }
+    select { cursor: pointer; }
+    select option { background: #fff; color: var(--ink); }
+
+    /* ── Sliders ── */
+    .slider-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .slider-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .slider-val {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    .slider-unit {
+      font-size: .72rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-left: 2px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 99px;
+      background: var(--teal-mid);
+      outline: none;
+      cursor: pointer;
+      border: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--teal);
+      border: 3px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+      cursor: pointer;
+      transition: transform .15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    input[type="range"]:focus { outline: none; box-shadow: none; }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: .68rem;
+      color: var(--muted);
+    }
+
+    /* ── Submit section ── */
+    .submit-section {
+      padding: 24px 32px;
+      background: #fafaf8;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .submit-note {
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .submit-note strong { color: var(--ink-2); }
+
+    #submitBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: var(--teal);
+      border: none;
+      border-radius: var(--r);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .18s, transform .15s, box-shadow .18s;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(13,124,102,.3);
+    }
+    #submitBtn:hover {
+      background: #0b6b58;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(13,124,102,.35);
+    }
+    #submitBtn:active { transform: scale(.98); }
+    #submitBtn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .spinner {
+      width: 15px; height: 15px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error ── */
+    #errorMsg {
+      display: none;
+      margin: 16px 32px;
+      padding: 12px 16px;
+      border-radius: var(--r);
+      background: var(--red-lt);
+      border-left: 3px solid var(--red);
+      color: var(--red);
+      font-size: .83rem;
+      font-weight: 500;
+    }
+
+    /* ── Result ── */
+    #result {
+      display: none;
+      margin-top: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: slideUp .35s ease;
+    }
+    @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+    .result-header {
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .score-badge {
+      width: 72px; height: 72px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .score-num {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .score-denom {
+      font-size: .65rem;
+      font-weight: 600;
+      opacity: .7;
+      letter-spacing: .04em;
+    }
+    .result-meta { flex: 1; }
+    .result-verdict {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .result-desc {
+      font-size: .85rem;
+      color: var(--ink-2);
+      line-height: 1.6;
+    }
+
+    .result-body {
+      padding: 20px 28px;
+    }
+    .tips-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .tips-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tip-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .85rem;
+      color: var(--ink-2);
+    }
+    .tip-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--teal); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <nav class="topbar">
+    <div class="logo">Mind<em>Score</em></div>
+    <span class="topbar-tag">ML-Powered Assessment</span>
+  </nav>
+
+  <main class="page">
+
+    <!-- Hero -->
+    <div class="hero">
+      <span class="eyebrow">Free · Instant · Private</span>
+      <h1>Understand your<br><em>mental wellbeing</em></h1>
+      <p class="hero-sub">Answer a few questions about your daily habits and lifestyle. Our trained model will estimate a mental health score based on patterns in your data.</p>
+    </div>
+
+    <!-- Steps indicator -->
+    <div class="steps" id="stepsBar">
+      <div class="step active" id="step1"><span class="step-num">1</span><span>Personal</span></div>
+      <div class="step" id="step2"><span class="step-num">2</span><span>Academic</span></div>
+      <div class="step" id="step3"><span class="step-num">3</span><span>Social Media</span></div>
+      <div class="step" id="step4"><span class="step-num">4</span><span>Lifestyle</span></div>
+    </div>
+
+    <!-- Form card -->
+    <div class="form-card">
+      <form id="predictForm" novalidate>
+
+        <!-- 1. Personal -->
+        <div class="section">
+          <div class="section-head">
+            <div class="section-icon">&#128100;</div>
+            <span class="section-title">Personal Information</span>
+          </div>
+          <div class="grid g3">
+            <div class="field">
+              <label for="age">Age</label>
+              <input type="number" id="age" name="Age" min="10" max="100" placeholder="21" required />
+            </div>
+            <div class="field">
+              <label for="gender">Gender</label>
+              <select id="gender" name="Gender" required>
+                <option value="" disabled selected>Choose&hellip;</option>
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="country">Country</label>
+              <select id="country" name="Country" required>
+                <option value="" disabled selected>Choose&hellip;</option>
+                <option>United States</option>
+                <option>India</option>
+                <option>United Kingdom</option>
+                <option>Canada</option>
+                <option>Australia</option>
+                <option>Germany</option>
+                <option>France</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Academic -->
+        <div class="section">
+          <div class="section-head">
+            <div class="section-icon">&#127891;</div>
+            <span class="section-title">Academic Details</span>
+          </div>
+          <div class="grid g2">
+            <div class="field">
+              <label for="academicLevel">Academic Level</label>
+              <select id="academicLevel" name="Academic_Level" required>
+                <option value="" disabled selected>Choose&hellip;</option>
+                <option>High School</option>
+                <option>Undergraduate</option>
+                <option>Graduate</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="studyHours">Daily Study Hours</label>
+              <div class="slider-wrap">
+                <div class="slider-top">
+                  <span style="font-size:.78rem;font-weight:600;color:#3d3d3d;">Hours per day</span>
+                  <span><span class="slider-val" id="studyHoursVal">4</span><span class="slider-unit">hrs</span></span>
+                </div>
+                <input type="range" id="studyHours" name="Study_Hours" min="0" max="16" step="0.5" value="4"
+                  oninput="syncSlider('studyHoursVal', this.value)" />
+                <div class="slider-labels"><span>0</span><span>8</span><span>16</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Social Media -->
+        <div class="section">
+          <div class="section-head">
+            <div class="section-icon">&#128241;</div>
+            <span class="section-title">Social Media Habits</span>
+          </div>
+          <div class="grid g2" style="margin-bottom:18px">
+            <div class="field">
+              <label for="platform">Most Used Platform</label>
+              <select id="platform" name="Most_Used_Platform" required>
+                <option value="" disabled selected>Choose&hellip;</option>
+                <option>Facebook</option>
+                <option>Instagram</option>
+                <option>Twitter</option>
+                <option>YouTube</option>
+                <option>TikTok</option>
+                <option>Snapchat</option>
+                <option>LinkedIn</option>
+                <option>WhatsApp</option>
+                <option>WeChat</option>
+                <option>LINE</option>
+                <option>KakaoTalk</option>
+                <option>VKontakte</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="purpose">Purpose of Use</label>
+              <select id="purpose" name="Purpose_Of_Use" required>
+                <option value="" disabled selected>Choose&hellip;</option>
+                <option>Entertainment</option>
+                <option>Education</option>
+                <option>Networking</option>
+                <option>News</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid g2">
+            <div class="field">
+              <label for="usageHours">Average Daily Usage</label>
+              <div class="slider-wrap">
+                <div class="slider-top">
+                  <span style="font-size:.78rem;font-weight:600;color:#3d3d3d;">Hours on platform</span>
+                  <span><span class="slider-val" id="usageHoursVal">3</span><span class="slider-unit">hrs</span></span>
+                </div>
+                <input type="range" id="usageHours" name="Avg_Daily_Usage_Hours" min="0" max="24" step="0.5" value="3"
+                  oninput="syncSlider('usageHoursVal', this.value)" />
+                <div class="slider-labels"><span>0</span><span>12</span><span>24</span></div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="unlocks">Daily Phone Unlocks</label>
+              <div class="slider-wrap">
+                <div class="slider-top">
+                  <span style="font-size:.78rem;font-weight:600;color:#3d3d3d;">Times unlocked</span>
+                  <span><span class="slider-val" id="unlocksVal">30</span><span class="slider-unit">×</span></span>
+                </div>
+                <input type="range" id="unlocks" name="Daily_Unlocks" min="0" max="200" step="1" value="30"
+                  oninput="syncSlider('unlocksVal', this.value)" />
+                <div class="slider-labels"><span>0</span><span>100</span><span>200</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Lifestyle -->
+        <div class="section">
+          <div class="section-head">
+            <div class="section-icon">&#127939;</div>
+            <span class="section-title">Lifestyle &amp; Wellbeing</span>
+          </div>
+          <div class="grid g3">
+            <div class="field">
+              <label for="sleep">Sleep per Night</label>
+              <div class="slider-wrap">
+                <div class="slider-top">
+                  <span style="font-size:.78rem;font-weight:600;color:#3d3d3d;">Hours</span>
+                  <span><span class="slider-val" id="sleepVal">7</span><span class="slider-unit">hrs</span></span>
+                </div>
+                <input type="range" id="sleep" name="Sleep_Hours_Per_Night" min="0" max="12" step="0.5" value="7"
+                  oninput="syncSlider('sleepVal', this.value)" />
+                <div class="slider-labels"><span>0</span><span>6</span><span>12</span></div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="activity">Physical Activity</label>
+              <div class="slider-wrap">
+                <div class="slider-top">
+                  <span style="font-size:.78rem;font-weight:600;color:#3d3d3d;">Hours/day</span>
+                  <span><span class="slider-val" id="activityVal">1</span><span class="slider-unit">hrs</span></span>
+                </div>
+                <input type="range" id="activity" name="Physical_Activity_Hours" min="0" max="8" step="0.5" value="1"
+                  oninput="syncSlider('activityVal', this.value)" />
+                <div class="slider-labels"><span>0</span><span>4</span><span>8</span></div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="stress">Stress Level</label>
+              <select id="stress" name="Stress_Level" required>
+                <option value="" disabled selected>Choose&hellip;</option>
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+                <option>Very High</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="submit-section">
+          <p class="submit-note">
+            <strong>Privacy first.</strong> Your data is sent only to our local model and never stored.
+          </p>
+          <button type="submit" id="submitBtn">
+            <span id="btnSpinner" class="spinner"></span>
+            <span id="btnText">Get my score &rarr;</span>
+          </button>
+        </div>
+
+        <!-- Error -->
+        <div id="errorMsg"></div>
+
+      </form>
+    </div>
+
+    <!-- Result -->
+    <div id="result"></div>
+
+    <footer>
+      Built by <a href="#">Ayan Hussain</a> &nbsp;·&nbsp; Powered by FastAPI + scikit-learn
+    </footer>
+
+  </main>
+
+  <script>
+    /* Slider sync */
+    function syncSlider(id, val) {
+      document.getElementById(id).textContent = val;
+      highlightStep();
+    }
+
+    /* Highlight step bar on interaction */
+    const stepFields = {
+      step1: ['age','gender','country'],
+      step2: ['academicLevel','studyHours'],
+      step3: ['platform','purpose','usageHours','unlocks'],
+      step4: ['sleep','activity','stress'],
+    };
+
+    function highlightStep() {
+      Object.entries(stepFields).forEach(([stepId, ids]) => {
+        const el = document.getElementById(stepId);
+        const filled = ids.some(id => {
+          const f = document.getElementById(id);
+          if (!f) return false;
+          if (f.tagName === 'SELECT') return f.value !== '';
+          return f.value !== '' && f.value != null;
+        });
+        if (filled) {
+          el.classList.remove('active');
+          el.classList.add('done');
+        }
+      });
+    }
+
+    document.querySelectorAll('select, input').forEach(el => {
+      el.addEventListener('change', highlightStep);
+      el.addEventListener('input', highlightStep);
+    });
+
+    /* Submit */
+    document.getElementById('predictForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form    = e.target;
+      const btn     = document.getElementById('submitBtn');
+      const spinner = document.getElementById('btnSpinner');
+      const btnText = document.getElementById('btnText');
+      const errDiv  = document.getElementById('errorMsg');
+      const resDom  = document.getElementById('result');
+
+      errDiv.style.display = 'none';
+      resDom.style.display = 'none';
+
+      /* Validate */
+      const reqSelects = form.querySelectorAll('select[required]');
+      let valid = true;
+      reqSelects.forEach(s => { if (!s.value) valid = false; });
+      const ageVal = parseInt(form.Age.value);
+      if (isNaN(ageVal) || ageVal < 10 || ageVal > 100) valid = false;
+
+      if (!valid) {
+        showError('Please complete all fields before submitting.');
+        return;
+      }
+
+      btn.disabled = true;
+      spinner.style.display = 'block';
+      btnText.textContent = 'Calculating...';
+
+      try {
+        const payload = {
+          Age:                     parseInt(form.Age.value),
+          Gender:                  form.Gender.value,
+          Country:                 form.Country.value,
+          Academic_Level:          form.Academic_Level.value,
+          Most_Used_Platform:      form.Most_Used_Platform.value,
+          Purpose_Of_Use:          form.Purpose_Of_Use.value,
+          Avg_Daily_Usage_Hours:   parseFloat(form.Avg_Daily_Usage_Hours.value),
+          Daily_Unlocks:           parseInt(form.Daily_Unlocks.value),
+          Study_Hours:             parseFloat(form.Study_Hours.value),
+          Physical_Activity_Hours: parseFloat(form.Physical_Activity_Hours.value),
+          Sleep_Hours_Per_Night:   parseFloat(form.Sleep_Hours_Per_Night.value),
+          Stress_Level:            form.Stress_Level.value,
+        };
+
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || 'Server returned ' + res.status);
+        }
+
+        const data  = await res.json();
+        const score = parseFloat(data.predected_mental_health_score).toFixed(1);
+        renderResult(parseFloat(score));
+
+      } catch (err) {
+        showError(err.message || 'Could not reach the server. Is uvicorn running?');
+      } finally {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = 'Get my score \u2192';
+      }
+    });
+
+    function renderResult(score) {
+      let color, bg, border, verdict, desc, tips;
+
+      if (score >= 8) {
+        color = '#0d7c66'; bg = '#e6f4f1'; border = '#b2ddd6';
+        verdict = 'Excellent';
+        desc = 'Your mental health looks strong. Your habits around sleep, activity, and screen time are working well for you.';
+        tips = [
+          'Keep your current sleep schedule consistent',
+          'Continue staying physically active daily',
+          'Your balanced screen time is a real asset',
+        ];
+      } else if (score >= 6) {
+        color = '#1d4ed8'; bg = '#dbeafe'; border = '#bfdbfe';
+        verdict = 'Good';
+        desc = 'You\'re doing well overall. A few targeted improvements could help you feel even better day to day.';
+        tips = [
+          'Try to add 20–30 min of exercise if not already doing so',
+          'Review your social media usage during evenings',
+          'Aim for 7–8 hours of sleep consistently',
+        ];
+      } else if (score >= 4) {
+        color = '#b45309'; bg = '#fef3c7'; border = '#fde68a';
+        verdict = 'Moderate';
+        desc = 'There are noticeable areas under strain. Small daily changes around stress and sleep can make a meaningful difference.';
+        tips = [
+          'Try limiting phone pickups to under 60 per day',
+          'Establish a consistent wind-down routine before bed',
+          'Consider a short daily walk or mindfulness break',
+        ];
+      } else {
+        color = '#b91c1c'; bg = '#fee2e2'; border = '#fecaca';
+        verdict = 'Needs Attention';
+        desc = 'Your current patterns suggest significant stress. Speaking with a counsellor or mental health professional is a meaningful step.';
+        tips = [
+          'Reach out to a trusted friend, mentor, or counsellor',
+          'Identify your biggest stressor and take one small action',
+          'Reduce social media time by 30 min starting today',
+        ];
+      }
+
+      const tipsHTML = tips.map(t =>
+        '<div class="tip-row"><div class="tip-dot" style="background:' + color + '"></div><span>' + t + '</span></div>'
+      ).join('');
+
+      const resDom = document.getElementById('result');
+      resDom.innerHTML =
+        '<div class="result-header">' +
+          '<div class="score-badge" style="background:' + bg + ';border:1.5px solid ' + border + ';color:' + color + '">' +
+            '<span class="score-num">' + score.toFixed(1) + '</span>' +
+            '<span class="score-denom">OUT OF 10</span>' +
+          '</div>' +
+          '<div class="result-meta">' +
+            '<div class="result-verdict" style="color:' + color + '">' + verdict + ' Mental Health</div>' +
+            '<div class="result-desc">' + desc + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="result-body">' +
+          '<div class="tips-label">Actionable next steps</div>' +
+          '<div class="tips-list">' + tipsHTML + '</div>' +
+        '</div>';
+
+      resDom.style.display = 'block';
+      setTimeout(() => resDom.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+    }
+
+    function showError(msg) {
+      const errDiv = document.getElementById('errorMsg');
+      errDiv.textContent = msg;
+      errDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
